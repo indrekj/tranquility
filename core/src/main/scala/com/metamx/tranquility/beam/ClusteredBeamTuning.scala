@@ -25,6 +25,7 @@ import org.joda.time.{DateTime, Period}
 case class ClusteredBeamTuning(
   segmentGranularity: Granularity = Granularity.HOUR,
   warmingPeriod: Period = new Period(0),
+  startImmediately: Boolean = false,
   windowPeriod: Period = new Period("PT10M"),
   partitions: Int = 1,
   replicants: Int = 1,
@@ -66,6 +67,14 @@ object ClusteredBeamTuning
       * Default is PT0M (off).
       */
     def warmingPeriod(x: Period) = new Builder(config.copy(warmingPeriod = x))
+
+    /**
+      * If true, does not wait for any events to start Druid tasks. This can be useful if there are not a lot of
+      * incoming events.
+      *
+      * Default is false.
+      */
+    def startImmediately(x: Boolean) = new Builder(config.copy(startImmediately = x))
 
     /**
       * Accept events this far outside of their timeline block. For example, if it's currently 1:25PM, and your
@@ -122,11 +131,12 @@ object ClusteredBeamTuning
   def create(
     segmentGranularity: Granularity,
     warmingPeriod: Period,
+    startImmediately: Boolean,
     windowPeriod: Period,
     partitions: Int,
     replicants: Int
   ): ClusteredBeamTuning =
   {
-    apply(segmentGranularity, warmingPeriod, windowPeriod, partitions, replicants, 1, 1)
+    apply(segmentGranularity, warmingPeriod, startImmediately, windowPeriod, partitions, replicants, 1, 1)
   }
 }

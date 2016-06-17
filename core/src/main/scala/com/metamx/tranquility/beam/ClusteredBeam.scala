@@ -465,6 +465,29 @@ class ClusteredBeam[EventType: Timestamper, InnerBeamType <: Beam[EventType]](
   }
 
   override def toString = "ClusteredBeam(%s)" format identifier
+
+  def ensureBeamsRunning() = {
+    val now = timekeeper.now.withZone(DateTimeZone.UTC)
+    val start = tuning.segmentBucket(now).start
+    beam(start, now)
+  }
+
+  private[this] def startWatching() {
+    var watcherThread = new Thread(new Runnable {
+      def run() {
+        while (open) {
+          // TODO: Ensure beams are running
+          Thread.sleep(1000)
+        }
+      }
+    })
+    watcherThread.start()
+  }
+
+  if (tuning.startImmediately) {
+    ensureBeamsRunning()
+    startWatching()
+  }
 }
 
 /**

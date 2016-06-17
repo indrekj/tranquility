@@ -174,9 +174,12 @@ class ClusteredBeamTest extends FunSuite with CuratorRequiringSuite with BeforeA
     }
   }
 
-  def newBeams(curator: CuratorFramework, tuning: ClusteredBeamTuning): TestingBeamsHolder = {
+  def newBeams(
+    curator: CuratorFramework,
+    tuning: ClusteredBeamTuning,
+    timekeeper: TestingTimekeeper = new TestingTimekeeper
+  ): TestingBeamsHolder = {
     val beamMaker = new TestingBeamMaker
-    val timekeeper = new TestingTimekeeper
     val objectMapper = new ObjectMapper withEffect {
       jm =>
         jm.registerModule(DefaultScalaModule)
@@ -209,6 +212,7 @@ class ClusteredBeamTest extends FunSuite with CuratorRequiringSuite with BeforeA
   val defaultTuning = ClusteredBeamTuning(
     segmentGranularity = Granularity.HOUR,
     warmingPeriod = 0.minutes,
+    startImmediately = false,
     windowPeriod = 10.minutes,
     partitions = 2,
     replicants = 1,
@@ -395,6 +399,22 @@ class ClusteredBeamTest extends FunSuite with CuratorRequiringSuite with BeforeA
             (new DateTime("2012-01-01T01Z"), 1, false, Nil)
           )
         )
+    }
+  }
+
+  test("StartImmediately") {
+    withLocalCurator {
+      curator =>
+        val timekeeper = new TestingTimekeeper
+        timekeeper.now = new DateTime("2016-07-02T03:16Z")
+        val beams = newBeams(curator, defaultTuning.copy(startImmediately = true), timekeeper)
+        val desired = List("2016-07-02T03Z", "2016-07-02T03Z").map(new DateTime(_))
+        val startTime = System.currentTimeMillis()
+        while (System.currentTimeMillis() < startTime + 2000 &&
+          beamsList.map(_.timestamp).sortBy(_.millis) != desired) {
+          Thread.sleep(100)
+        }
+        assert(beamsList.map(_.timestamp).sortBy(_.millis) === desired)
     }
   }
 

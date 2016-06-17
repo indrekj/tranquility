@@ -59,6 +59,9 @@ abstract class PropertiesBasedConfig(
   @Config(Array("task.warmingPeriod"))
   def taskWarmingPeriod: Period = ClusteredBeamTuning().warmingPeriod
 
+  @Config(Array("task.startImmediately"))
+  def taskStartImmediately: Boolean = ClusteredBeamTuning().startImmediately
+
   @Config(Array("serialization.format"))
   def serializationFormat: String = "json"
 

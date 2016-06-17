@@ -87,6 +87,7 @@ Any of these properties can be specified either globally, or per-dataSource.
 |`task.partitions`|Number of Druid partitions to create.|1|
 |`task.replicants`|Number of instances of each Druid partition to create. This is the *total* number of instances, so 2 replicants means 2 tasks will be created.|1|
 |`task.warmingPeriod`|If nonzero, create Druid tasks early. This can be useful if tasks take a long time to start up in your environment.|PT0M|
+|`task.startImmediately`|If true, does not wait for any events to start Druid tasks. This can be useful if there are not a lot of incoming events.|false|
 |`tranquility.blockOnFull`|Whether "send" will block (true) or throw an exception (false) when called while the outgoing queue is full.|true|
 |`tranquility.lingerMillis`|Wait this long for batches to collect more messages (up to maxBatchSize) before sending them. Set to zero to disable waiting. Set to -1 to always wait for complete batches before sending. NOTE: With lingerMillis set to -1, if you really want to send patial batches, use flush otherwise partial batches will never be sent.|0|
 |`tranquility.maxBatchSize`|Maximum number of messages to send at once.|2000|
